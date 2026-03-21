@@ -1,7 +1,9 @@
 #!/bin/bash
 
+SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
+
 # Load configuration settings from gpt2giga.cfg
-source gpt2giga.cfg
+source $SCRIPT_DIR/gpt2giga.cfg
 
 # Function to print help message
 print_help() {

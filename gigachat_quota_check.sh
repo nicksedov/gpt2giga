@@ -1,12 +1,15 @@
 #!/bin/bash
 
+SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
+SECRETS_FILE=secrets.txt
+
 # Имена аккаунтов на https://developers.sber.ru/studio
 account_1="T2"
 account_2="MTS"
 
 # Проверяем наличие файла secrets.txt
-if [[ ! -f secrets.txt ]]; then
-    echo "Ошибка: файл secrets.txt не найден в текущей директории" >&2
+if [[ ! -f "$SCRIPT_DIR/$SECRETS_FILE" ]]; then
+    echo "Ошибка: файл $SECRETS_FILE не найден в директории скрипта ($SCRIPT_DIR)" >&2
     exit 1
 fi
 
@@ -21,19 +24,19 @@ declare -A AUTH_KEYS
 while IFS='=' read -r key value; do
     [[ -n "$key" && -n "$value" && "$key" =~ ^[A-Za-z0-9_]+$ ]] || continue
     AUTH_KEYS["$key"]="$value"
-done < secrets.txt
+done < "$SCRIPT_DIR/$SECRETS_FILE"
 
 # Проверяем наличие ключей для аккаунтов
 if [[ -z "${AUTH_KEYS[$account_1]}" || -z "${AUTH_KEYS[$account_2]}" ]]; then
-    echo "Ошибка: в secrets.txt отсутствуют ключи для $account_1 или $account_2" >&2
+    echo "Ошибка: в $SECRETS_FILE отсутствуют ключи для $account_1 или $account_2" >&2
     exit 1
 fi
 
 declare -A BALANCES
 
 get_token() {
-    local label="$1" auth_key="$2" token_file="token_${label}.txt"
-    curl --cacert russian_trusted_root.cer -L -s \
+    local label="$1" auth_key="$2" token_file="$SCRIPT_DIR/token_${label}.txt"
+    curl --cacert "$SCRIPT_DIR/russian_trusted_root.cer" -L -s \
         -X POST 'https://ngw.devices.sberbank.ru:9443/api/v2/oauth' \
         -H 'Content-Type: application/x-www-form-urlencoded' \
         -H 'Accept: application/json' \
@@ -45,8 +48,8 @@ get_token() {
 }
 
 save_balance() {
-    local label="$1" token="$2" balance_file="balance_${label}.json"
-    curl --cacert russian_trusted_root.cer -L -s \
+    local label="$1" token="$2" balance_file="$SCRIPT_DIR/balance_${label}.json"
+    curl --cacert "$SCRIPT_DIR/russian_trusted_root.cer" -L -s \
         -X GET 'https://gigachat.devices.sberbank.ru/api/v1/balance' \
         -H 'Accept: application/json' \
         -H "RqUID: $(cat /proc/sys/kernel/random/uuid)" \
@@ -67,12 +70,12 @@ for label in "${!AUTH_KEYS[@]}"; do
     save_balance "$label" "$token"
 done
 
-# Таблица как в оригинале (исправлены имена столбцов)
+# Таблица результатов
 printf "+----------------------------------------------+\n"
 printf "| %-18s | %-10s | %-10s |\n" "Model" "${account_2}" "${account_1}"
 printf "|--------------------+------------+------------|\n"
 
-# Правильное извлечение моделей: универсальный sed убирает префикс до последнего _
+# Извлечение названий моделей из имен ключей
 declare -A models
 for key in "${!BALANCES[@]}"; do
     model=$(echo "$key" | sed 's/.*_//')  # Только имя модели после последнего _
