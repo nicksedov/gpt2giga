@@ -137,10 +137,10 @@ fi
 
 if [[ "$RUN_TEST" == true ]]; then
   header "API /chat/completions test"
-  request POST "chat/completions" '{
-      "model": "${GIGACHAT_PROBE_MODEL:-GigaChat}",
-      "messages": [{"role": "user", "content": "Тест пройден"}]
-    }' || exit_code=1
+  request POST "chat/completions" "{
+      \"model\": \"${GIGACHAT_PROBE_MODEL:-GigaChat}\",
+      \"messages\": [{\"role\": \"user\", \"content\": \"Тест пройден\"}]
+    }" || exit_code=1
 fi
 
 exit "$exit_code"
