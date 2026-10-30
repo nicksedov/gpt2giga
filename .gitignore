@@ -2,3 +2,9 @@ secrets.txt
 gpt2giga.cfg
 
 .roo
+
+# Python (MCP-сервер mcp_weather/)
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/

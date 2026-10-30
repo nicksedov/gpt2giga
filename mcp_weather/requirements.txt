@@ -1,0 +1,3 @@
+# Зависимости MCP-сервера погоды
+# Установка: pip install -r requirements.txt
+mcp>=1.2,<2

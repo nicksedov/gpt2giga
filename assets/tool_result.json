@@ -1,0 +1,35 @@
+{
+  "messages": [
+    {"role": "user", "content": "Вызови get_weather для Москвы и ничего не выдумывай."},
+    {
+      "role": "assistant",
+      "content": "",
+      "tool_calls": [
+        {
+          "id": "",
+          "type": "function",
+          "function": {"name": "get_weather", "arguments": "{}"}
+        }
+      ]
+    },
+    {"role": "tool", "tool_call_id": "", "name": "get_weather", "content": ""}
+  ],
+  "tools": [
+    {
+      "type": "function",
+      "function": {
+        "name": "get_weather",
+        "description": "Возвращает текущую погоду в городе.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "city": {"type": "string", "description": "Название города"}
+          },
+          "required": ["city"]
+        }
+      }
+    }
+  ],
+  "tool_choice": "auto",
+  "stream": false
+}
